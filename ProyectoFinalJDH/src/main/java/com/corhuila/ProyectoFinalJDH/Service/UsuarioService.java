@@ -41,7 +41,7 @@ public class UsuarioService implements IUsuarioService {
         if(op.isEmpty()){
             System.out.println("Dato no encontrado");
         }else {
-			//Crear nuevo objeto que va a contener los datos que se van actualizar
+        	 //Crear nuevo objeto que va a contener los datos que se van actualizar
             Usuario usuarioUpdate = op.get();
             usuarioUpdate.setNombre(usuario.getNombre());
             usuarioUpdate.setCorreo(usuario.getCorreo());
@@ -68,7 +68,7 @@ public class UsuarioService implements IUsuarioService {
         if(op.isEmpty()){
             System.out.println("Dato no encontrado");
         }else {
-			//Crear nuevo objeto que va a contener los datos que se van actualizar
+        	 //Crear nuevo objeto que va a contener los datos que se van actualizar
             Usuario usuarioUpdate = op.get();
             usuarioUpdate.setFechaEliminacion(LocalDateTime.now());
             

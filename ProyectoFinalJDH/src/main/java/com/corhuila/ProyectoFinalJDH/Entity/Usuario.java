@@ -1,9 +1,13 @@
 package com.corhuila.ProyectoFinalJDH.Entity;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
@@ -33,7 +37,8 @@ public class Usuario {
 	@Column(name = "fecha_eliminacion", nullable = true)
 	private LocalDateTime fechaEliminacion;
 
-	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
-	private List<Vehiculo> vehiculos;
-
+	@Column(name = "estado", nullable = false)
+	private boolean estado;
+	
+	
 }
