@@ -1,55 +1,40 @@
 package com.corhuila.ProyectoFinalJDH.Entity;
 
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalTime;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Data
 @Entity
-@Table(name = "reserva")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Reserva {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "usuario_id", nullable = false)
+	private LocalDate fechaReserva;
+	private LocalTime horaReserva;
+	private String estado;
+	private String ubicacion;
+
+	@ManyToOne
+	@JoinColumn(name = "usuario_id")
 	private Usuario usuario;
 
-	@ManyToMany
-	@JoinTable(
-			name = "reserva_transporte",
-			joinColumns = @JoinColumn(name = "reserva_id"),
-			inverseJoinColumns = @JoinColumn(name = "transporte_id")
-	)
-	private List<Transporte> transportes;
+	@ManyToOne
+	@JoinColumn(name = "vehiculo_id")
+	private Vehiculo vehiculo;
 
-	@ManyToMany
-	@JoinTable(
-			name = "reserva_alojamiento",
-			joinColumns = @JoinColumn(name = "reserva_id"),
-			inverseJoinColumns = @JoinColumn(name = "alojamiento_id")
-	)
-	private List<Alojamiento> alojamientos;
-
-	@ManyToMany
-	@JoinTable(
-			name = "reserva_actividades",
-			joinColumns = @JoinColumn(name = "reserva_id"),
-			inverseJoinColumns = @JoinColumn(name = "actividades_id")
-	)
-	private List<Actividades> actividades;
-
-	@Column(name = "estado")
-	private Boolean estado;
-
-	@Column(name = "fecha_viaje")
-	private Date fechaViaje;
+	@ManyToOne
+	@JoinColumn(name = "servicio_id")
+	private Servicio servicio;
 
 	@Column(name = "fecha_creacion")
 	private LocalDateTime fechaCreacion;
@@ -59,5 +44,4 @@ public class Reserva {
 
 	@Column(name = "fecha_eliminacion")
 	private LocalDateTime fechaEliminacion;
-
 }

@@ -1,15 +1,14 @@
 package com.corhuila.ProyectoFinalJDH.Repository;
 
+import com.corhuila.ProyectoFinalJDH.Entity.Vehiculo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import com.corhuila.ProyectoFinalJDH.Entity.Reserva;
 
 import java.util.List;
 
 @Repository
-public interface ReservaRepository extends JpaRepository<Reserva, Long>{
+public interface VehiculoRepository extends JpaRepository<Vehiculo, Long>{
 
-    List<Reserva> findByUsuarioId(Long usuarioId);
+    List<Vehiculo> findByUsuarioId(Long usuarioId);
 
 }
