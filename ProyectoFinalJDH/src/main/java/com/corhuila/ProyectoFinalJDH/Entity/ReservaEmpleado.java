@@ -1,31 +1,21 @@
 package com.corhuila.ProyectoFinalJDH.Entity;
 
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Reserva {
+public class ReservaEmpleado {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	private LocalDate fechaReserva;
-	private LocalTime horaReserva;
-	private String estado;
-	private String ubicacion;
 
 	@Column(name = "fecha_creacion", nullable = true)
 	private LocalDateTime fechaCreacion;
@@ -37,14 +27,10 @@ public class Reserva {
 	private LocalDateTime fechaEliminacion;
 
 	@ManyToOne
-	@JoinColumn(name = "usuario_id")
-	private Usuario usuario;
+	@JoinColumn(name = "reserva_id")
+	private Reserva reserva;
 
 	@ManyToOne
-	@JoinColumn(name = "vehiculo_id")
-	private Vehiculo vehiculo;
-
-	@ManyToOne
-	@JoinColumn(name = "servicio_id")
-	private Servicio servicio;
+	@JoinColumn(name = "empleado_id")
+	private Empleado empleado;
 }
