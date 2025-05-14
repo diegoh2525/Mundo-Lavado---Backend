@@ -19,7 +19,7 @@ public class Empleado {
 
 	private String nombre;
 	private String telefono;
-	private boolean disponible;
+	private String disponible;
 
 	@Column(name = "fecha_creacion", nullable = true)
 	private LocalDateTime fechaCreacion;

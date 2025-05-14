@@ -4,11 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import com.corhuila.ProyectoFinalJDH.DTO.Response.ReservaResponse;
-import com.corhuila.ProyectoFinalJDH.Entity.Actividades;
-import com.corhuila.ProyectoFinalJDH.Entity.Alojamiento;
-import com.corhuila.ProyectoFinalJDH.Entity.Transporte;
-import com.corhuila.ProyectoFinalJDH.Mapper.ReservaMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +16,7 @@ public class ReservaService implements IReservaService {
 
 	@Autowired
 	private ReservaRepository repository;
-	
+
 	@Override
 	public List<Reserva> all() {
 		return repository.findAll();
@@ -40,78 +35,37 @@ public class ReservaService implements IReservaService {
 
 	@Override
 	public void update(Reserva reserva, Long id) {
-		//validar si existe.            
-        Optional<Reserva> op = repository.findById(id);		
-        
-        if(op.isEmpty()){
-            System.out.println("Dato no encontrado");
-        }else {
-        	 //Crear nuevo objeto que va a contener los datos que se van actualizar
-            Reserva reservaUpdate = op.get();
-            reservaUpdate.setUsuario(reserva.getUsuario());
-            reservaUpdate.setTransportes(reserva.getTransportes());
-            reservaUpdate.setAlojamientos(reserva.getAlojamientos());
-            reservaUpdate.setActividades(reserva.getActividades());
-            reservaUpdate.setEstado(reserva.getEstado());
-            reservaUpdate.setFechaModificacion(LocalDateTime.now());
-            
-            //Actualizar el objeto
-            repository.save(reservaUpdate);
-        }
-        
-        
+		Optional<Reserva> op = repository.findById(id);
+		if (op.isEmpty()) {
+			System.out.println("Dato no encontrado");
+		} else {
+			Reserva r = op.get();
+			r.setFechaReserva(reserva.getFechaReserva());
+			r.setHoraReserva(reserva.getHoraReserva());
+			r.setEstado(reserva.getEstado());
+			r.setUbicacion(reserva.getUbicacion());
+			r.setUsuario(reserva.getUsuario());
+			r.setVehiculo(reserva.getVehiculo());
+			r.setServicio(reserva.getServicio());
+			r.setFechaModificacion(LocalDateTime.now());
+			repository.save(r);
+		}
 	}
 
 	@Override
 	public void deletePhysical(Long id) {
-		repository.deleteById(id);	
+		repository.deleteById(id);
 	}
 
 	@Override
 	public void deleteLogical(Long id) {
-		//validar si existe.            
-        Optional<Reserva> op = repository.findById(id);		
-        
-        if(op.isEmpty()){
-            System.out.println("Dato no encontrado");
-        }else {
-        	 //Crear nuevo objeto que va a contener los datos que se van actualizar
-            Reserva reservaUpdate = op.get();
-            reservaUpdate.setFechaEliminacion(LocalDateTime.now());
-            
-            //Actualizar el objeto
-            repository.save(reservaUpdate);
-        }		
-	}
-
-	public int calcularCostoTotal(Reserva reserva) {
-		int costoTransportes = reserva.getTransportes().stream()
-				.mapToInt(Transporte::getCosto)
-				.sum();
-
-		int costoAlojamientos = reserva.getAlojamientos().stream()
-				.mapToInt(Alojamiento::getCosto)
-				.sum();
-
-		int costoActividades = reserva.getActividades().stream()
-				.mapToInt(Actividades::getCosto)
-				.sum();
-
-		return costoTransportes + costoAlojamientos + costoActividades;
-	}
-
-	public ReservaResponse obtenerReservaDTO(Long id) {
-		Optional<Reserva> reservaOptional = repository.findById(id);
-
-		if (reservaOptional.isEmpty()) {
-			throw new RuntimeException("Reserva no encontrada");
+		Optional<Reserva> op = repository.findById(id);
+		if (op.isEmpty()) {
+			System.out.println("Dato no encontrado");
+		} else {
+			Reserva r = op.get();
+			r.setFechaEliminacion(LocalDateTime.now());
+			repository.save(r);
 		}
-
-		Reserva reserva = reservaOptional.get();
-
-		// Ya no necesitas calcular el costo manualmente, el Mapper lo hace.
-		return ReservaMapper.toDTO(reserva);
 	}
-
-
 }

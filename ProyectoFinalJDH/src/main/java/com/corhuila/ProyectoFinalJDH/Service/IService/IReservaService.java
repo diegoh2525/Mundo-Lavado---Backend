@@ -25,6 +25,4 @@ public interface IReservaService {
 			
 	// Eliminar lógico
 	public void deleteLogical(Long id);
-
-	ReservaResponse obtenerReservaDTO(Long id);
 }
