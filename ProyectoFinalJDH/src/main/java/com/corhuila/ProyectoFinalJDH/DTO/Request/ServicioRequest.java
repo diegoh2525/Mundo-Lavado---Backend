@@ -3,8 +3,8 @@ package com.corhuila.ProyectoFinalJDH.DTO.Request;
 import lombok.Data;
 
 @Data
-public class UsuarioRequest {
+public class ServicioRequest {
     private String nombre;
-    private String correo;
-    private String password;
+    private String descripcion;
+    private double precio;
 }
