@@ -21,7 +21,6 @@ public class UsuarioMapper {
         usuario.setNombre(request.getNombre());
         usuario.setCorreo(request.getCorreo());
         usuario.setPassword(request.getPassword());
-        usuario.setEstado(request.isEstado());
         return usuario;
     }
 }

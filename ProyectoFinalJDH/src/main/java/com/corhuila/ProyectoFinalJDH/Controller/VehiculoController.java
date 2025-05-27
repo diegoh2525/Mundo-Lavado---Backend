@@ -2,8 +2,10 @@ package com.corhuila.ProyectoFinalJDH.Controller;
 
 import com.corhuila.ProyectoFinalJDH.DTO.Request.VehiculoRequest;
 import com.corhuila.ProyectoFinalJDH.DTO.Response.VehiculoResponse;
+import com.corhuila.ProyectoFinalJDH.Entity.Usuario;
 import com.corhuila.ProyectoFinalJDH.Entity.Vehiculo;
 import com.corhuila.ProyectoFinalJDH.Mapper.VehiculoMapper;
+import com.corhuila.ProyectoFinalJDH.Repository.UsuarioRepository;
 import com.corhuila.ProyectoFinalJDH.Service.IService.IVehiculoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,8 @@ public class VehiculoController {
 
     @Autowired
     private IVehiculoService service;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @GetMapping
     public List<VehiculoResponse> all() {
@@ -39,14 +43,14 @@ public class VehiculoController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public VehiculoResponse save(@RequestBody VehiculoRequest request) {
-        Vehiculo vehiculo = VehiculoMapper.toEntity(request);
+        Vehiculo vehiculo = VehiculoMapper.toEntity(request, usuario);
         return VehiculoMapper.toResponse(service.save(vehiculo));
     }
 
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public void update(@RequestBody VehiculoRequest request, @PathVariable Long id) {
-        Vehiculo vehiculo = VehiculoMapper.toEntity(request);
+        Vehiculo vehiculo = VehiculoMapper.toEntity(request, usuario);
         service.update(vehiculo, id);
     }
 
