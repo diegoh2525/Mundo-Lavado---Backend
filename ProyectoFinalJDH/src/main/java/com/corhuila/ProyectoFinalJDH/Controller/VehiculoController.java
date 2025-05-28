@@ -5,64 +5,82 @@ import com.corhuila.ProyectoFinalJDH.DTO.Response.VehiculoResponse;
 import com.corhuila.ProyectoFinalJDH.Entity.Usuario;
 import com.corhuila.ProyectoFinalJDH.Entity.Vehiculo;
 import com.corhuila.ProyectoFinalJDH.Mapper.VehiculoMapper;
-import com.corhuila.ProyectoFinalJDH.Repository.UsuarioRepository;
+import com.corhuila.ProyectoFinalJDH.Service.IService.IUsuarioService;
 import com.corhuila.ProyectoFinalJDH.Service.IService.IVehiculoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("v1/ProyectoFinalJDH/Vehiculo")
+@RequestMapping("/api/vehiculos")
 public class VehiculoController {
 
     @Autowired
-    private IVehiculoService service;
+    private IVehiculoService vehiculoService;
+
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private IUsuarioService usuarioService;
 
     @GetMapping
-    public List<VehiculoResponse> all() {
-        return service.all()
+    public ResponseEntity<List<VehiculoResponse>> getAll() {
+        List<VehiculoResponse> responseList = vehiculoService.all()
                 .stream()
+                .filter(v -> v.getFechaEliminacion() == null) // Filtra eliminados lógicamente
                 .map(VehiculoMapper::toResponse)
                 .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responseList);
     }
 
-    @GetMapping("{id}")
-    public VehiculoResponse findById(@PathVariable Long id) {
-        Optional<Vehiculo> vehiculo = service.findById(id);
-        return vehiculo.map(VehiculoMapper::toResponse)
-                .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
+    @GetMapping("/{id}")
+    public ResponseEntity<VehiculoResponse> getById(@PathVariable Long id) {
+        Optional<Vehiculo> optional = vehiculoService.findById(id);
+        if (optional.isEmpty() || optional.get().getFechaEliminacion() != null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(VehiculoMapper.toResponse(optional.get()));
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public VehiculoResponse save(@RequestBody VehiculoRequest request) {
-        Vehiculo vehiculo = VehiculoMapper.toEntity(request, usuario);
-        return VehiculoMapper.toResponse(service.save(vehiculo));
+    public ResponseEntity<VehiculoResponse> create(@RequestBody VehiculoRequest request) {
+        Optional<Usuario> usuarioOptional = usuarioService.findById(request.getUsuarioId());
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Vehiculo vehiculo = VehiculoMapper.toEntity(request, usuarioOptional.get());
+        Vehiculo nuevo = vehiculoService.save(vehiculo);
+
+        return ResponseEntity.ok(VehiculoMapper.toResponse(nuevo));
     }
 
-    @PutMapping("{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void update(@RequestBody VehiculoRequest request, @PathVariable Long id) {
-        Vehiculo vehiculo = VehiculoMapper.toEntity(request, usuario);
-        service.update(vehiculo, id);
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable Long id, @RequestBody VehiculoRequest request) {
+        Optional<Usuario> usuarioOptional = usuarioService.findById(request.getUsuarioId());
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Vehiculo vehiculo = VehiculoMapper.toEntity(request, usuarioOptional.get());
+        vehiculoService.update(vehiculo, id);
+
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("deleteLogical/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteLogical(@PathVariable Long id) {
-        service.deleteLogical(id);
+    @DeleteMapping("/fisico/{id}")
+    public ResponseEntity<Void> deletePhysical(@PathVariable Long id) {
+        vehiculoService.deletePhysical(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePhysical(@PathVariable Long id) {
-        service.deletePhysical(id);
+    @DeleteMapping("/logico/{id}")
+    public ResponseEntity<Void> deleteLogical(@PathVariable Long id) {
+        vehiculoService.deleteLogical(id);
+        return ResponseEntity.noContent().build();
     }
 }
