@@ -1,72 +1,96 @@
 package com.corhuila.ProyectoFinalJDH.Controller;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.corhuila.ProyectoFinalJDH.DTO.Request.ReservaRequest;
 import com.corhuila.ProyectoFinalJDH.DTO.Response.ReservaResponse;
 import com.corhuila.ProyectoFinalJDH.Entity.Reserva;
+import com.corhuila.ProyectoFinalJDH.Entity.Usuario;
+import com.corhuila.ProyectoFinalJDH.Entity.Vehiculo;
+import com.corhuila.ProyectoFinalJDH.Entity.Servicio;
+import com.corhuila.ProyectoFinalJDH.Mapper.ReservaMapper;
 import com.corhuila.ProyectoFinalJDH.Service.IService.IReservaService;
+import com.corhuila.ProyectoFinalJDH.Repository.UsuarioRepository;
+import com.corhuila.ProyectoFinalJDH.Repository.VehiculoRepository;
+import com.corhuila.ProyectoFinalJDH.Repository.ServicioRepository;
 
-@CrossOrigin(origins = "*")
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @RestController
-@RequestMapping("v1/ProyectoFinalJDH/Reserva")
+@RequestMapping("/api/reserva")
+@CrossOrigin("*")
 public class ReservaController {
 
-	@Autowired
-	private IReservaService service;
+    @Autowired
+    private IReservaService reservaService;
 
-	@GetMapping()
-    public List<Reserva> all() {
-        return service.all();
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private VehiculoRepository vehiculoRepository;
+
+    @Autowired
+    private ServicioRepository servicioRepository;
+
+    @GetMapping
+    public ResponseEntity<List<ReservaResponse>> getAll() {
+        List<ReservaResponse> list = reservaService.all().stream()
+                .map(ReservaMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(list);
     }
 
-	 @GetMapping("{id}")
-    public Optional<Reserva> findById(@PathVariable Long id) {
-        return service.findById(id);
+    @GetMapping("{id}")
+    public ResponseEntity<ReservaResponse> getById(@PathVariable Long id) {
+        Optional<Reserva> reserva = reservaService.findById(id);
+        return reserva.map(value -> ResponseEntity.ok(ReservaMapper.toResponse(value)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
-	 @PostMapping
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public Reserva save(@RequestBody Reserva reserva) {
-        return service.save(reserva);
+    @PostMapping
+    public ResponseEntity<ReservaResponse> create(@RequestBody ReservaRequest request) {
+        Optional<Usuario> usuario = usuarioRepository.findById(request.getUsuarioId());
+        Optional<Vehiculo> vehiculo = vehiculoRepository.findById(request.getVehiculoId());
+        Optional<Servicio> servicio = servicioRepository.findById(request.getServicioId());
+
+        if (usuario.isEmpty() || vehiculo.isEmpty() || servicio.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Reserva reserva = ReservaMapper.toEntity(request, usuario.get(), vehiculo.get(), servicio.get());
+        Reserva saved = reservaService.save(reserva);
+        return ResponseEntity.ok(ReservaMapper.toResponse(saved));
     }
 
-	 @PutMapping("{id}")
-    @ResponseStatus(code = HttpStatus.OK)
-    public void update(@RequestBody Reserva reserva, @PathVariable Long id) {
-        service.update(reserva, id);
+    @PutMapping("{id}")
+    public ResponseEntity<Void> update(@RequestBody ReservaRequest request, @PathVariable Long id) {
+        Optional<Usuario> usuario = usuarioRepository.findById(request.getUsuarioId());
+        Optional<Vehiculo> vehiculo = vehiculoRepository.findById(request.getVehiculoId());
+        Optional<Servicio> servicio = servicioRepository.findById(request.getServicioId());
+
+        if (usuario.isEmpty() || vehiculo.isEmpty() || servicio.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Reserva reserva = ReservaMapper.toEntity(request, usuario.get(), vehiculo.get(), servicio.get());
+        reservaService.update(reserva, id);
+        return ResponseEntity.noContent().build();
     }
 
-	 @PutMapping("deleteLogical/{id}")
-    @ResponseStatus(code = HttpStatus.OK)
-    public void deleteLogical(@PathVariable Long id) {
-        service.deleteLogical(id);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deletePhysical(@PathVariable Long id) {
+        reservaService.deletePhysical(id);
+        return ResponseEntity.noContent().build();
     }
 
-	 @DeleteMapping("{id}")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void deletePhysical(@PathVariable Long id) {
-        service.deletePhysical(id);
+    @DeleteMapping("/logic/{id}")
+    public ResponseEntity<Void> deleteLogical(@PathVariable Long id) {
+        reservaService.deleteLogical(id);
+        return ResponseEntity.noContent().build();
     }
-
-    @GetMapping("/detalle/{id}")
-    @ResponseStatus(code = HttpStatus.OK)
-    public ReservaResponse obtenerDetalleReserva(@PathVariable Long id) {
-        return service.obtenerReservaDTO(id);
-    }
-
-
 }

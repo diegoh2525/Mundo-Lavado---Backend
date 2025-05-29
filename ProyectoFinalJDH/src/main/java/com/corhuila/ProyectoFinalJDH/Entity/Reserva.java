@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "reserva")
 public class Reserva {
 
 	@Id

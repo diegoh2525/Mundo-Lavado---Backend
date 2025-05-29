@@ -1,9 +1,11 @@
 package com.corhuila.ProyectoFinalJDH.DTO.Response;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
+@Data
 public class ReservaResponse {
     private Long id;
     private LocalDate fechaReserva;
