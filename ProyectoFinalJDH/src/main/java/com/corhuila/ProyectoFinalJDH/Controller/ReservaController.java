@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/reserva")
+@RequestMapping("/api/reservas")
 @CrossOrigin("*")
 public class ReservaController {
 

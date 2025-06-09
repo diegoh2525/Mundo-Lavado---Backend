@@ -50,8 +50,6 @@ public class UsuarioService implements IUsuarioService {
             //Actualizar el objeto
             repository.save(usuarioUpdate);
         }
-        
-        
 	}
 
 	@Override
