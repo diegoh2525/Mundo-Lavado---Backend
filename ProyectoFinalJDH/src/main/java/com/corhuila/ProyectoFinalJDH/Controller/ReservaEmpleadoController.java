@@ -1,6 +1,9 @@
 package com.corhuila.ProyectoFinalJDH.Controller;
 
+import com.corhuila.ProyectoFinalJDH.DTO.Request.ReservaEmpleadoRequest;
+import com.corhuila.ProyectoFinalJDH.DTO.Response.ReservaEmpleadoResponse;
 import com.corhuila.ProyectoFinalJDH.Entity.ReservaEmpleado;
+import com.corhuila.ProyectoFinalJDH.Mapper.ReservaEmpleadoMapper;
 import com.corhuila.ProyectoFinalJDH.Service.IService.IReservaEmpleadoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,64 +19,55 @@ import java.util.Optional;
 public class ReservaEmpleadoController {
 
     @Autowired
-    private IReservaEmpleadoService reservaEmpleadoService;
+    private IReservaEmpleadoService service;
 
-    // Obtener todos (excluyendo eliminados lógicamente)
+    @Autowired
+    private ReservaEmpleadoMapper mapper;
+
+    // ✅ GET: Obtener todos
     @GetMapping
-    public ResponseEntity<List<ReservaEmpleado>> getAll() {
-        List<ReservaEmpleado> lista = reservaEmpleadoService.all().stream()
-                .filter(re -> re.getFechaEliminacion() == null)
-                .toList();
-        return ResponseEntity.ok(lista);
+    public ResponseEntity<List<ReservaEmpleadoResponse>> getAll() {
+        List<ReservaEmpleado> lista = service.all();
+        return ResponseEntity.ok(mapper.toResponseList(lista));
     }
 
-    // Obtener por ID
+    // ✅ GET: Obtener por ID
     @GetMapping("/{id}")
-    public ResponseEntity<ReservaEmpleado> getById(@PathVariable Long id) {
-        Optional<ReservaEmpleado> op = reservaEmpleadoService.findById(id);
-        if (op.isEmpty() || op.get().getFechaEliminacion() != null) {
+    public ResponseEntity<ReservaEmpleadoResponse> getById(@PathVariable Long id) {
+        Optional<ReservaEmpleado> optional = service.findById(id);
+        if (optional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(op.get());
+        return ResponseEntity.ok(mapper.toResponse(optional.get()));
     }
 
-    // Crear
+    // ✅ POST: Crear nuevo
     @PostMapping
-    public ResponseEntity<ReservaEmpleado> create(@RequestBody ReservaEmpleado reservaEmpleado) {
-        ReservaEmpleado saved = reservaEmpleadoService.save(reservaEmpleado);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    public ResponseEntity<ReservaEmpleadoResponse> create(@RequestBody ReservaEmpleadoRequest request) {
+        ReservaEmpleado entity = mapper.toEntity(request);
+        ReservaEmpleado saved = service.save(entity);
+        return new ResponseEntity<>(mapper.toResponse(saved), HttpStatus.CREATED);
     }
 
-    // Modificar
+    // ✅ PUT: Actualizar
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@RequestBody ReservaEmpleado reservaEmpleado, @PathVariable Long id) {
-        Optional<ReservaEmpleado> op = reservaEmpleadoService.findById(id);
-        if (op.isEmpty() || op.get().getFechaEliminacion() != null) {
-            return ResponseEntity.notFound().build();
-        }
-        reservaEmpleadoService.update(reservaEmpleado, id);
+    public ResponseEntity<Void> update(@RequestBody ReservaEmpleadoRequest request, @PathVariable Long id) {
+        ReservaEmpleado entity = mapper.toEntity(request);
+        service.update(entity, id);
         return ResponseEntity.noContent().build();
     }
 
-    // Eliminar físico
-    @DeleteMapping("/fisico/{id}")
-    public ResponseEntity<Void> deletePhysical(@PathVariable Long id) {
-        Optional<ReservaEmpleado> op = reservaEmpleadoService.findById(id);
-        if (op.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        reservaEmpleadoService.deletePhysical(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // Eliminar lógico
-    @DeleteMapping("/logico/{id}")
+    // ✅ DELETE lógico
+    @DeleteMapping("/logical/{id}")
     public ResponseEntity<Void> deleteLogical(@PathVariable Long id) {
-        Optional<ReservaEmpleado> op = reservaEmpleadoService.findById(id);
-        if (op.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        reservaEmpleadoService.deleteLogical(id);
+        service.deleteLogical(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ✅ DELETE físico
+    @DeleteMapping("/physical/{id}")
+    public ResponseEntity<Void> deletePhysical(@PathVariable Long id) {
+        service.deletePhysical(id);
         return ResponseEntity.noContent().build();
     }
 }
